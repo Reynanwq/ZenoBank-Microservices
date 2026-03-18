@@ -13,9 +13,10 @@
 4. [Os 12 Bancos Financeiros](#4-os-12-bancos-financeiros)
 5. [Infraestrutura Global](#5-infraestrutura-global)
 6. [Padrões e Contratos Globais](#6-padrões-e-contratos-globais)
-7. [Banco Universo 7 — Especificação Completa](#7-banco-universo-7--especificação-completa)
-8. [Bancos U1–U6 e U8–U12](#8-bancos-u1u6-e-u8u12)
-9. [Glossário Global](#9-glossário-global)
+7. [Arquitetura Multi-Módulo](#7-arquitetura-multi-módulo)
+8. [Banco Universo 7 — Especificação Completa](#8-banco-universo-7--especificação-completa)
+9. [Bancos U1–U6 e U8–U12](#9-bancos-u1u6-e-u8u12)
+10. [Glossário Global](#10-glossário-global)
 
 ---
 
@@ -39,17 +40,18 @@ A decisão arquitetural central do ZenōBank é que **cada universo é uma juris
 - **Falha isolada** — se o banco do Universo 9 cair, os outros 11 continuam operando
 - **Deploy independente** — cada banco tem seu próprio pipeline de CI/CD
 - **Escalabilidade independente** — o Universo 11 pode ter 10x mais carga que o Universo 3 e escalar de forma autônoma
-- **Tecnologia adequada ao domínio** — um universo com foco em alta frequência usa Go + ScyllaDB; outro com foco em flexibilidade usa Python + MongoDB
+- **Tecnologia adequada ao domínio** — cada universo escolhe sua stack no momento da sua especificação
 - **Times independentes** — cada banco pode ser desenvolvido por um time dedicado sem afetar os demais
 
 ### Escala do projeto
 
 | Dimensão | Estimativa |
 |----------|-----------|
-| Total de microserviços | 80–120 (média de 7–10 por banco + infraestrutura global) |
+| Total de módulos raiz | 13 (12 bancos + God Panel) + módulos de infra compartilhada |
+| Total de sub-módulos | 80–120 (média de 7–10 por banco) |
 | Bancos de dados distintos | 30–50 instâncias isoladas |
 | Tópicos Kafka | 100+ tópicos entre locais e globais |
-| Repositórios | 1 por microserviço (monorepo por banco ou multi-repo) |
+| Repositórios | Monorepo com workspace por módulo |
 | Times de desenvolvimento | 1 time dedicado por universo + 1 time de plataforma |
 
 ---
@@ -60,15 +62,14 @@ A decisão arquitetural central do ZenōBank é que **cada universo é uma juris
 ┌─────────────────────────────────────────────────────────────────────┐
 │                        GOD PANEL                                    │
 │           Sistema Central de Orquestração e Monitoramento           │
-│         Next.js · NestJS · PostgreSQL · Redis · Grafana             │
+│              Stack: a definir no momento da especificação           │
 └───────┬──────────┬──────────┬──────────┬──────────┬────────────────┘
         │          │          │          │          │
         ▼          ▼          ▼          ▼          ▼
 ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────────┐
 │  Banco   │ │  Banco   │ │  Banco   │ │  Banco   │ │    Banco     │
 │   U1     │ │   U2     │ │   U3     │ │   U4     │ │   U5 … U12  │
-│ Node.js  │ │  Java    │ │   Go     │ │  Python  │ │    ...       │
-│ PG       │ │ MySQL    │ │ ScyllaDB │ │ MongoDB  │ │    ...       │
+│[stack TBD]│ │[stack TBD]│ │[stack TBD]│ │[stack TBD]│ │  [stack TBD] │
 └──────────┘ └──────────┘ └──────────┘ └──────────┘ └──────────────┘
         │          │          │          │          │
         └──────────┴──────────┴──────────┴──────────┘
@@ -116,14 +117,7 @@ O God Panel é o sistema que o **Zeno-sama** usa para ter visibilidade e control
 
 ### Stack
 
-| Componente | Tecnologia |
-|-----------|-----------|
-| Frontend | Next.js |
-| Backend API | NestJS |
-| Banco de dados | PostgreSQL |
-| Cache | Redis |
-| Métricas | Prometheus + Grafana |
-| Comunicação com bancos | Kafka (consome eventos de todos os universos) |
+> A stack do God Panel será definida no momento da sua especificação, assim como ocorre com cada banco universo.
 
 ### O que o God Panel NÃO faz
 
@@ -136,24 +130,32 @@ O God Panel é o sistema que o **Zeno-sama** usa para ter visibilidade e control
 
 ## 4. Os 12 Bancos Financeiros
 
-Cada banco é um **sistema financeiro completo e autônomo**, com todos os componentes que uma instituição financeira real possui: contas, transações, cartões, crédito, investimentos, notificações, compliance. A escolha de stack diferente para cada banco é intencional — reflete a filosofia de que cada universo tem sua própria identidade tecnológica.
+Cada banco é um **sistema financeiro completo e autônomo**, com todos os componentes que uma instituição financeira real possui: contas, transações, cartões, crédito, investimentos, notificações, compliance.
+
+### Stacks — decisão intencional e tardia
+
+**As stacks dos bancos ainda não foram definidas.** Essa é uma decisão intencional do ZenōBank: cada universo escolherá sua stack no momento da sua especificação formal, respeitando as seguintes regras:
+
+- **Uma stack por universo** — quando um universo escolhe sua linguagem e banco de dados, **tudo dentro dele** usa essa mesma stack. Se o Universo 7 for implementado em Java, todos os seus sub-módulos (being-service, account-service, clearing-service, etc.) serão Java. Não existe mescla de linguagens dentro de um mesmo universo.
+- **Stacks diferentes entre universos são encorajadas** — reflete a filosofia de que cada universo tem sua própria identidade tecnológica.
+- **O U7 (GalactiBank) é o único já especificado** — sua stack está definida na seção 8. Os demais estão com stack `[A DEFINIR]`.
 
 ### Tabela de bancos
 
-| Universo | Banco | Runtime | Banco de dados | Status |
-|----------|-------|---------|---------------|--------|
-| U1 | NovaPay | Node.js | PostgreSQL | `[A DEFINIR]` |
-| U2 | PicBank | Java Spring | MySQL | `[A DEFINIR]` |
-| U3 | CyberBank | Go | ScyllaDB | `[A DEFINIR]` |
-| U4 | AstutoBank | Python | MongoDB | `[A DEFINIR]` |
-| U5 | IronVault | Rust | CockroachDB | `[A DEFINIR]` |
-| U6 | TwinBank | Kotlin | Cassandra | `[A DEFINIR]` |
-| **U7** | **GalactiBank** | **Node.js** | **PostgreSQL** | **Especificado ✓** |
-| U8 | SwiftBank | Elixir | Redis + PG | `[A DEFINIR]` |
-| U9 | BasicBank | PHP | MariaDB | `[A DEFINIR]` |
-| U10 | ElephantBank | Java | Oracle DB | `[A DEFINIR]` |
-| U11 | HeroBank | Go | TimescaleDB | `[A DEFINIR]` |
-| U12 | ZenBank | Scala | DynamoDB | `[A DEFINIR]` |
+| Universo | Banco | Stack | Status |
+|----------|-------|-------|--------|
+| U1 | NovaPay | `[A DEFINIR]` | `[A DEFINIR]` |
+| U2 | PicBank | `[A DEFINIR]` | `[A DEFINIR]` |
+| U3 | CyberBank | `[A DEFINIR]` | `[A DEFINIR]` |
+| U4 | AstutoBank | `[A DEFINIR]` | `[A DEFINIR]` |
+| U5 | IronVault | `[A DEFINIR]` | `[A DEFINIR]` |
+| U6 | TwinBank | `[A DEFINIR]` | `[A DEFINIR]` |
+| **U7** | **GalactiBank** | **Ver seção 8** | **Especificado ✓** |
+| U8 | SwiftBank | `[A DEFINIR]` | `[A DEFINIR]` |
+| U9 | BasicBank | `[A DEFINIR]` | `[A DEFINIR]` |
+| U10 | ElephantBank | `[A DEFINIR]` | `[A DEFINIR]` |
+| U11 | HeroBank | `[A DEFINIR]` | `[A DEFINIR]` |
+| U12 | ZenBank | `[A DEFINIR]` | `[A DEFINIR]` |
 
 ### O que todo banco tem em comum
 
@@ -275,11 +277,104 @@ Todos os IDs em todos os bancos seguem o padrão **UUID v4**. Isso garante unici
 
 ---
 
-## 7. Banco Universo 7 — Especificação Completa
+## 7. Arquitetura Multi-Módulo
+
+O ZenōBank é construído com **uso intenso e pesado de multi-módulo**. Toda a organização de código reflete essa decisão arquitetural — desde o nível mais alto (o monorepo) até o nível mais interno de cada banco.
+
+### 7.1 Visão geral — os 13 módulos raiz
+
+O projeto inteiro vive em um **monorepo com workspace**. Cada banco é um módulo completamente autônomo, com seu próprio arquivo de dependências, seu próprio `Dockerfile` e seu próprio pipeline de CI/CD. Um `install` dentro de `u7-galactibank` não puxa nada de `u3-cyberbank`.
+
+```
+@zenobank/ (monorepo raiz)
+│
+├── god-panel/                  ← módulo 1
+│
+├── u1-novapay/                 ← módulo 2
+├── u2-picbank/                 ← módulo 3
+├── u3-cyberbank/               ← módulo 4
+├── u4-astutobank/              ← módulo 5
+├── u5-ironvault/               ← módulo 6
+├── u6-twinbank/                ← módulo 7
+├── u7-galactibank/             ← módulo 8 (especificado ✓)
+├── u8-swiftbank/               ← módulo 9
+├── u9-basicbank/               ← módulo 10
+├── u10-elephantbank/           ← módulo 11
+├── u11-herobank/               ← módulo 12
+├── u12-zenbank/                ← módulo 13
+│
+└── infra/                      ← módulos de infraestrutura compartilhada
+    ├── kafka-bus/
+    ├── auth-global/
+    ├── observability/
+    └── compliance/
+```
+
+> Os módulos de infra compartilhada não contam como "bancos" — são pacotes utilitários consumidos pelos 13 módulos raiz.
+
+### 7.2 Sub-módulos dentro de cada banco
+
+Dentro de cada banco, cada domínio de negócio é também um **módulo separado**. O mecanismo exato de modularização depende da linguagem escolhida pelo universo (módulo NestJS, pacote Maven, pacote Go, etc.), mas o princípio é o mesmo em todos: **cada microserviço é um sub-módulo com fronteiras bem definidas**.
+
+A estrutura abaixo usa o U7 como exemplo de referência — os outros bancos seguirão o mesmo padrão de organização, adaptado à sua stack:
+
+```
+u7-galactibank/
+│
+├── apps/
+│   └── api-gateway/            ← entry point do banco (módulo raiz interno)
+│
+└── modules/
+    ├── being/                  ← @u7/being
+    ├── planet/                 ← @u7/planet
+    ├── account/                ← @u7/account
+    ├── transaction/            ← @u7/transaction
+    ├── clearing/               ← @u7/clearing  ← módulo mais crítico
+    ├── credit/                 ← @u7/credit
+    ├── card/                   ← @u7/card
+    ├── ledger/                 ← @u7/ledger
+    ├── notification/           ← @u7/notification
+    ├── wealth/                 ← @u7/wealth
+    └── auth/                   ← @u7/auth (proxy do auth-global)
+```
+
+Cada sub-módulo possui seus próprios controllers, services, repositórios, DTOs e entidades — sem acesso direto às entidades de outro sub-módulo.
+
+### 7.3 Regra de stack por universo
+
+> **Uma stack por universo — sem exceções.**
+
+Quando um universo define sua stack (linguagem + banco de dados), **todos os seus sub-módulos obrigatoriamente usam essa mesma stack**. Não existe mescla de linguagens dentro de um mesmo universo.
+
+| Exemplo | Consequência |
+|---------|-------------|
+| Universo X define Java | being-service, account-service, clearing-service... todos em Java |
+| Universo Y define Go | being-service, account-service, clearing-service... todos em Go |
+| Universo Z define Python | being-service, account-service, clearing-service... todos em Python |
+
+Isso garante coerência tecnológica interna, facilita onboarding de devs no time do universo e elimina complexidade de interoperabilidade dentro do mesmo banco.
+
+### 7.4 Regras de comunicação entre módulos
+
+| Nível | Comunicação permitida | Comunicação proibida |
+|-------|----------------------|----------------------|
+| Entre bancos diferentes | Kafka (eventos) | Import direto de código, chamada direta de DB |
+| Entre sub-módulos do mesmo banco | DI do framework (service exportado) | Acesso direto ao repositório de outro módulo |
+| Sub-módulo → infra compartilhada | Import do pacote `@zenobank/auth-global` etc. | Reimplementar o que já existe na infra |
+
+A comunicação entre bancos **sempre passa pelo Kafka** — nunca por chamada HTTP direta entre módulos de universos distintos.
+
+### 7.5 O que ainda será detalhado
+
+A especificação interna de cada sub-módulo (controllers, services, DTOs, entidades, testes, contratos de API) será feita banco por banco, à medida que cada universo for especificado. O U7 serve de referência de processo para os demais.
+
+---
+
+## 8. Banco Universo 7 — Especificação Completa
 
 > O Universo 7 é o universo do Goku. Seu banco financeiro, o **GalactiBank**, é o primeiro a ser completamente especificado e serve de referência de implementação para os demais universos.
 
-### 7.1 Contexto do Universo 7
+### 8.1 Contexto do Universo 7
 
 O GalactiBank é responsável por coordenar as informações financeiras de **todos os seres vivos e todos os planetas** do Universo 7. Opera como um banco financeiro real — contas, transações, crédito, cartões, investimentos — com a particularidade de que seus clientes incluem tanto seres individuais quanto planetas inteiros como entidades financeiras.
 
@@ -290,7 +385,7 @@ O GalactiBank é responsável por coordenar as informações financeiras de **to
 - **Imposto interplanetário** — cada planeta define sua alíquota; cobrado automaticamente no clearing
 - **Crédito sempre local** — crédito aprovado em um planeta não pode ser usado em outro
 
-### 7.2 Stack
+### 8.2 Stack
 
 | Camada | Tecnologia |
 |--------|-----------|
@@ -304,7 +399,9 @@ O GalactiBank é responsável por coordenar as informações financeiras de **to
 | Observabilidade | Prometheus + Grafana + Jaeger |
 | Secrets | Vault |
 
-### 7.3 Arquitetura interna
+> Todos os sub-módulos do U7 (being-service, account-service, clearing-service, etc.) são implementados em Node.js + NestJS. Nenhum sub-módulo do U7 usa linguagem ou framework diferente.
+
+### 8.3 Arquitetura interna
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
@@ -320,13 +417,13 @@ O GalactiBank é responsável por coordenar as informações financeiras de **to
      ▼          ▼          ▼          ▼          ▼
 ┌─────────┐ ┌────────┐ ┌────────┐ ┌────────┐ ┌──────────┐
 │ Being   │ │Planet  │ │Account │ │Transact│ │Clearing  │
-│ Service │ │Service │ │Service │ │ Service│ │ Service  │
+│ Module  │ │Module  │ │Module  │ │ Module │ │ Module   │
 └─────────┘ └────────┘ └────────┘ └────────┘ └──────────┘
      │          │          │          │          │
      ▼          ▼          ▼          ▼          ▼
 ┌─────────┐ ┌────────┐ ┌────────┐ ┌────────┐ ┌──────────┐
 │ Credit  │ │  Card  │ │Wealth  │ │Notific.│ │ Ledger   │
-│ Service │ │Service │ │Service │ │ Service│ │ Service  │
+│ Module  │ │Module  │ │Module  │ │ Module │ │ Module   │
 └─────────┘ └────────┘ └────────┘ └────────┘ └──────────┘
                           │
         ┌─────────────────▼──────────────────────┐
@@ -343,7 +440,7 @@ O GalactiBank é responsável por coordenar as informações financeiras de **to
 └──────────────┘  └──────────────┘  └────────────┘
 ```
 
-### 7.4 Modelo de Dados
+### 8.4 Modelo de Dados
 
 #### `BEING` — Ser Vivo
 
@@ -422,7 +519,7 @@ Planeta é uma entidade financeira de primeira classe — tem conta, pode transa
 | `valid_from` | TIMESTAMP | Início da vigência |
 | `valid_until` | TIMESTAMP | Fim da vigência (null = vigente agora) |
 
-> O histórico de alíquotas é preservado para auditoria. O Clearing Service sempre usa a alíquota vigente **no momento exato da transação**, nunca a atual.
+> O histórico de alíquotas é preservado para auditoria. O Clearing Module sempre usa a alíquota vigente **no momento exato da transação**, nunca a atual.
 
 ---
 
@@ -519,7 +616,7 @@ Crédito é sempre local ao planeta. Não existe crédito interplanetário.
 
 ---
 
-### 7.5 Regras de Negócio
+### 8.5 Regras de Negócio
 
 #### Seres vivos
 
@@ -549,7 +646,7 @@ Crédito é sempre local ao planeta. Não existe crédito interplanetário.
 
 - Crédito é **sempre vinculado a uma conta específica em um planeta específico**
 - Crédito aprovado no Planeta A **não pode ser usado** no Planeta B
-- Análise, aprovação e cobrança são responsabilidade exclusiva do `Credit Service`
+- Análise, aprovação e cobrança são responsabilidade exclusiva do `Credit Module`
 
 #### Transações
 
@@ -561,7 +658,7 @@ Crédito é sempre local ao planeta. Não existe crédito interplanetário.
 
 ---
 
-### 7.6 Tipos de Movimentação
+### 8.6 Tipos de Movimentação
 
 #### Intraplanetária (mesmo planeta) — 2 lançamentos no ledger
 
@@ -593,7 +690,7 @@ Cada lado paga o imposto do **seu próprio planeta**:
 **Ciclo de estados:**
 ```
 INITIATED → PENDING (hold aplicado no saldo de A1)
-          → CLEARING (Clearing Service roteando)
+          → CLEARING (Clearing Module roteando)
           → SETTLED (4 lançamentos gravados atomicamente)
           → FAILED (saldo insuficiente / conta destino inexistente / timeout)
           → REVERSED (estorno solicitado após liquidação)
@@ -601,14 +698,14 @@ INITIATED → PENDING (hold aplicado no saldo de A1)
 
 ---
 
-### 7.7 Clearing Service
+### 8.7 Clearing Module
 
-O Clearing Service é o componente mais crítico do GalactiBank — responsável exclusivo pelo processamento de transações interplanetárias.
+O Clearing Module é o componente mais crítico do GalactiBank — responsável exclusivo pelo processamento de transações interplanetárias.
 
 #### Responsabilidades (em ordem de execução)
 
 1. Verificar existência de conta destino no planeta destino — se não existir, `FAILED` imediato
-2. Verificar saldo disponível via `Account Service` — se insuficiente, `FAILED` imediato
+2. Verificar saldo disponível via `Account Module` — se insuficiente, `FAILED` imediato
 3. Aplicar **hold** no saldo de origem — TX entra em `PENDING`
 4. Consultar alíquotas vigentes de ambos os planetas em `PLANET_TAX_CONFIG`
 5. Calcular os 4 valores:
@@ -630,50 +727,50 @@ O Clearing Service é o componente mais crítico do GalactiBank — responsável
 | Timeout no clearing | Hold liberado, TX → `FAILED`, rollback total |
 | Erro parcial nos lançamentos | Rollback de todos os lançamentos, TX → `FAILED` |
 
-#### O que o Clearing Service NÃO faz
+#### O que o Clearing Module NÃO faz
 
-- Não define alíquotas — responsabilidade do `Planet Service`
-- Não aprova crédito — responsabilidade do `Credit Service`
-- Não notifica seres — responsabilidade do `Notification Service`
-- Não processa transações intraplanetárias — responsabilidade do `Transaction Service`
+- Não define alíquotas — responsabilidade do `Planet Module`
+- Não aprova crédito — responsabilidade do `Credit Module`
+- Não notifica seres — responsabilidade do `Notification Module`
+- Não processa transações intraplanetárias — responsabilidade do `Transaction Module`
 
 ---
 
-### 7.8 Microserviços internos
+### 8.8 Sub-módulos internos
 
-| Serviço | Responsabilidade |
-|---------|----------------|
-| `being-service` | Cadastro de seres, emissão de UID, gestão de procuradores |
-| `planet-service` | Cadastro de planetas, alíquotas, mudanças de status |
-| `auth-service` | Autenticação, JWT, validação de UID, verificação de proxy |
-| `account-service` | Abertura/encerramento de contas, saldo, holds, congelamento |
-| `transaction-service` | Transações intraplanetárias — 2 lançamentos atômicos |
-| `clearing-service` | Transações interplanetárias — 4 lançamentos atômicos + impostos |
-| `credit-service` | Análise, aprovação, liberação e cobrança de crédito |
-| `card-service` | Emissão, bloqueio, fatura de cartões |
-| `wealth-service` | Investimentos e produtos de renda |
-| `ledger-service` | Leitura e auditoria do livro contábil imutável |
-| `notification-service` | Notificações via Kafka — push, mensagem, comunicados |
+| Módulo | Responsabilidade |
+|--------|----------------|
+| `being` | Cadastro de seres, emissão de UID, gestão de procuradores |
+| `planet` | Cadastro de planetas, alíquotas, mudanças de status |
+| `auth` | Autenticação, JWT, validação de UID, verificação de proxy |
+| `account` | Abertura/encerramento de contas, saldo, holds, congelamento |
+| `transaction` | Transações intraplanetárias — 2 lançamentos atômicos |
+| `clearing` | Transações interplanetárias — 4 lançamentos atômicos + impostos |
+| `credit` | Análise, aprovação, liberação e cobrança de crédito |
+| `card` | Emissão, bloqueio, fatura de cartões |
+| `wealth` | Investimentos e produtos de renda |
+| `ledger` | Leitura e auditoria do livro contábil imutável |
+| `notification` | Notificações via Kafka — push, mensagem, comunicados |
 
-### 7.9 Tópicos Kafka do U7
+### 8.9 Tópicos Kafka do U7
 
 | Tópico | Publicado por | Consumido por |
 |--------|--------------|---------------|
-| `u7.being.registered` | being-service | auth-service, notification-service |
-| `u7.account.opened` | account-service | notification-service |
-| `u7.account.frozen` | account-service | card-service, credit-service |
-| `u7.transaction.initiated` | transaction/clearing-service | notification-service |
-| `u7.transaction.settled` | transaction/clearing-service | ledger-service, notification-service, God Panel |
-| `u7.transaction.failed` | transaction/clearing-service | notification-service |
-| `u7.planet.destroyed` | planet-service | account-service |
-| `u7.planet.tax.updated` | planet-service | clearing-service |
-| `u7.credit.approved` | credit-service | notification-service |
-| `global.transaction.settled` | clearing-service | God Panel |
+| `u7.being.registered` | being | auth, notification |
+| `u7.account.opened` | account | notification |
+| `u7.account.frozen` | account | card, credit |
+| `u7.transaction.initiated` | transaction / clearing | notification |
+| `u7.transaction.settled` | transaction / clearing | ledger, notification, God Panel |
+| `u7.transaction.failed` | transaction / clearing | notification |
+| `u7.planet.destroyed` | planet | account |
+| `u7.planet.tax.updated` | planet | clearing |
+| `u7.credit.approved` | credit | notification |
+| `global.transaction.settled` | clearing | God Panel |
 | `global.health.heartbeat` | api-gateway | God Panel |
 
 ---
 
-### 7.10 Decisões de Design do U7
+### 8.10 Decisões de Design do U7
 
 | # | Decisão | Justificativa |
 |---|---------|---------------|
@@ -691,13 +788,14 @@ O Clearing Service é o componente mais crítico do GalactiBank — responsável
 | 12 | Estorno via nova TX | Preserva integridade do ledger. Estorno é evento financeiro, não correção técnica. |
 | 13 | Status para planeta destruído | Planetas têm histórico financeiro. Deletar apagaria registros contábeis permanentes. |
 | 14 | Sem transferência entre universos | Cada universo é jurisdição financeira independente. |
-| 15 | Sem limites de movimentação | U7 não impõe restrições de valor. Controle de risco é do Credit Service. |
+| 15 | Sem limites de movimentação | U7 não impõe restrições de valor. Controle de risco é do Credit Module. |
+| 16 | Stack única (Node.js + NestJS) para todo o U7 | Coerência tecnológica interna. Todos os sub-módulos falam a mesma linguagem. |
 
 ---
 
-## 8. Bancos U1–U6 e U8–U12
+## 9. Bancos U1–U6 e U8–U12
 
-> Os demais 11 bancos ainda não foram especificados. Cada um seguirá o mesmo processo de design utilizado no Universo 7 — mapeamento de regras de negócio, modelo de dados, microserviços e decisões de arquitetura — respeitando as particularidades de cada universo.
+> Os demais 11 bancos ainda não foram especificados. Cada um seguirá o mesmo processo de design utilizado no Universo 7 — definição de stack, mapeamento de regras de negócio, modelo de dados, sub-módulos e decisões de arquitetura — respeitando as particularidades de cada universo.
 
 Todos os bancos devem:
 
@@ -705,28 +803,30 @@ Todos os bancos devem:
 - Seguir o **contrato global de eventos** da seção 6
 - Publicar os **eventos globais obrigatórios** para o God Panel
 - Respeitar os **padrões de nomenclatura** de tópicos Kafka
+- Adotar **uma única stack** para todo o universo (linguagem + banco de dados)
+- Organizar seus microserviços como **sub-módulos** seguindo o padrão da seção 7
 - Operar com **isolamento total** de dados em relação aos outros bancos
 
 A especificação de cada banco será adicionada a este README à medida que for concluída.
 
-| Banco | Status da especificação |
-|-------|------------------------|
-| U1 — NovaPay | `[A DEFINIR]` |
-| U2 — PicBank | `[A DEFINIR]` |
-| U3 — CyberBank | `[A DEFINIR]` |
-| U4 — AstutoBank | `[A DEFINIR]` |
-| U5 — IronVault | `[A DEFINIR]` |
-| U6 — TwinBank | `[A DEFINIR]` |
-| **U7 — GalactiBank** | **Especificado ✓** |
-| U8 — SwiftBank | `[A DEFINIR]` |
-| U9 — BasicBank | `[A DEFINIR]` |
-| U10 — ElephantBank | `[A DEFINIR]` |
-| U11 — HeroBank | `[A DEFINIR]` |
-| U12 — ZenBank | `[A DEFINIR]` |
+| Banco | Stack | Status da especificação |
+|-------|-------|------------------------|
+| U1 — NovaPay | `[A DEFINIR]` | `[A DEFINIR]` |
+| U2 — PicBank | `[A DEFINIR]` | `[A DEFINIR]` |
+| U3 — CyberBank | `[A DEFINIR]` | `[A DEFINIR]` |
+| U4 — AstutoBank | `[A DEFINIR]` | `[A DEFINIR]` |
+| U5 — IronVault | `[A DEFINIR]` | `[A DEFINIR]` |
+| U6 — TwinBank | `[A DEFINIR]` | `[A DEFINIR]` |
+| **U7 — GalactiBank** | **Node.js + NestJS + PostgreSQL + MongoDB + Redis** | **Especificado ✓** |
+| U8 — SwiftBank | `[A DEFINIR]` | `[A DEFINIR]` |
+| U9 — BasicBank | `[A DEFINIR]` | `[A DEFINIR]` |
+| U10 — ElephantBank | `[A DEFINIR]` | `[A DEFINIR]` |
+| U11 — HeroBank | `[A DEFINIR]` | `[A DEFINIR]` |
+| U12 — ZenBank | `[A DEFINIR]` | `[A DEFINIR]` |
 
 ---
 
-## 9. Glossário Global
+## 10. Glossário Global
 
 | Termo | Definição |
 |-------|-----------|
@@ -744,9 +844,13 @@ A especificação de cada banco será adicionada a este README à medida que for
 | **Evento global** | Evento publicado no Kafka e consumido pelo God Panel para monitoramento centralizado |
 | **TX** | Abreviação de Transaction — transação financeira |
 | **Jurisdição financeira** | Conjunto de regras, moeda e políticas de um universo — análogo a um país no mundo real |
+| **Módulo raiz** | Um dos 13 módulos de primeiro nível do monorepo (12 bancos + God Panel) |
+| **Sub-módulo** | Módulo interno de um banco universo — representa um domínio de negócio (being, account, clearing, etc.) |
+| **Stack por universo** | Regra que obriga todos os sub-módulos de um universo a usarem a mesma linguagem e banco de dados |
+| **Multi-módulo** | Padrão arquitetural do ZenōBank onde cada banco e cada domínio interno são módulos independentes e isolados |
 
 ---
 
 *Este documento é o contrato de especificação do ZenōBank.*
-*Toda alteração em regras de negócio, modelo de dados ou decisões de arquitetura deve ser refletida aqui antes de qualquer implementação.*
+*Toda alteração em regras de negócio, modelo de dados, decisões de arquitetura ou estrutura de módulos deve ser refletida aqui antes de qualquer implementação.*
 *Universos não especificados devem seguir o U7 como referência de processo.*
