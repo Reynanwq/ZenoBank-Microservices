@@ -1,0 +1,13 @@
+{
+  "name": "@zenobank/u8-swiftbank",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ZenōBank — SwiftBank (Universo 8)",
+  "scripts": {
+    "build": "echo 'build: u8-swiftbank — stack not defined yet'",
+    "test": "echo 'test: u8-swiftbank — stack not defined yet'",
+    "lint": "echo 'lint: u8-swiftbank — stack not defined yet'",
+    "start": "echo 'start: u8-swiftbank — stack not defined yet'",
+    "start:dev": "echo 'start:dev: u8-swiftbank — stack not defined yet'"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "@zenobank/u6-twinbank",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ZenōBank — TwinBank (Universo 6)",
+  "scripts": {
+    "build": "echo 'build: u6-twinbank — stack not defined yet'",
+    "test": "echo 'test: u6-twinbank — stack not defined yet'",
+    "lint": "echo 'lint: u6-twinbank — stack not defined yet'",
+    "start": "echo 'start: u6-twinbank — stack not defined yet'",
+    "start:dev": "echo 'start:dev: u6-twinbank — stack not defined yet'"
+  }
+}

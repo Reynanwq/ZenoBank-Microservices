@@ -1,0 +1,13 @@
+{
+  "name": "@zenobank/u1-novapay",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ZenōBank — NovaPay (Universo 1)",
+  "scripts": {
+    "build": "echo 'build: u1-novapay — stack not defined yet'",
+    "test": "echo 'test: u1-novapay — stack not defined yet'",
+    "lint": "echo 'lint: u1-novapay — stack not defined yet'",
+    "start": "echo 'start: u1-novapay — stack not defined yet'",
+    "start:dev": "echo 'start:dev: u1-novapay — stack not defined yet'"
+  }
+}

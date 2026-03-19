@@ -1,0 +1,11 @@
+{
+  "name": "@zenobank/compliance",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ZenōBank — infraestrutura compartilhada: compliance",
+  "scripts": {
+    "build": "echo 'build: compliance — a definir'",
+    "test": "echo 'test: compliance — a definir'",
+    "lint": "echo 'lint: compliance — a definir'"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "@zenobank/u11-herobank",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ZenōBank — HeroBank (Universo 11)",
+  "scripts": {
+    "build": "echo 'build: u11-herobank — stack not defined yet'",
+    "test": "echo 'test: u11-herobank — stack not defined yet'",
+    "lint": "echo 'lint: u11-herobank — stack not defined yet'",
+    "start": "echo 'start: u11-herobank — stack not defined yet'",
+    "start:dev": "echo 'start:dev: u11-herobank — stack not defined yet'"
+  }
+}

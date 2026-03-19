@@ -1,0 +1,16 @@
+{
+  "name": "@zenobank/u7-galactibank",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ZenōBank — GalactiBank (Universo 7 — Universo do Goku)",
+  "scripts": {
+    "build": "nest build",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "start:prod": "node dist/main"
+  }
+}

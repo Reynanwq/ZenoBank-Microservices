@@ -1,0 +1,11 @@
+{
+  "name": "@zenobank/observability",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ZenōBank — infraestrutura compartilhada: observability",
+  "scripts": {
+    "build": "echo 'build: observability — a definir'",
+    "test": "echo 'test: observability — a definir'",
+    "lint": "echo 'lint: observability — a definir'"
+  }
+}

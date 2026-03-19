@@ -1,0 +1,11 @@
+{
+  "name": "@zenobank/auth-global",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ZenōBank — infraestrutura compartilhada: auth-global",
+  "scripts": {
+    "build": "echo 'build: auth-global — a definir'",
+    "test": "echo 'test: auth-global — a definir'",
+    "lint": "echo 'lint: auth-global — a definir'"
+  }
+}

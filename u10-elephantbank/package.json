@@ -1,0 +1,13 @@
+{
+  "name": "@zenobank/u10-elephantbank",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ZenōBank — ElephantBank (Universo 10)",
+  "scripts": {
+    "build": "echo 'build: u10-elephantbank — stack not defined yet'",
+    "test": "echo 'test: u10-elephantbank — stack not defined yet'",
+    "lint": "echo 'lint: u10-elephantbank — stack not defined yet'",
+    "start": "echo 'start: u10-elephantbank — stack not defined yet'",
+    "start:dev": "echo 'start:dev: u10-elephantbank — stack not defined yet'"
+  }
+}

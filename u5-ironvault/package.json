@@ -1,0 +1,13 @@
+{
+  "name": "@zenobank/u5-ironvault",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ZenōBank — IronVault (Universo 5)",
+  "scripts": {
+    "build": "echo 'build: u5-ironvault — stack not defined yet'",
+    "test": "echo 'test: u5-ironvault — stack not defined yet'",
+    "lint": "echo 'lint: u5-ironvault — stack not defined yet'",
+    "start": "echo 'start: u5-ironvault — stack not defined yet'",
+    "start:dev": "echo 'start:dev: u5-ironvault — stack not defined yet'"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "@zenobank/u9-basicbank",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ZenōBank — BasicBank (Universo 9)",
+  "scripts": {
+    "build": "echo 'build: u9-basicbank — stack not defined yet'",
+    "test": "echo 'test: u9-basicbank — stack not defined yet'",
+    "lint": "echo 'lint: u9-basicbank — stack not defined yet'",
+    "start": "echo 'start: u9-basicbank — stack not defined yet'",
+    "start:dev": "echo 'start:dev: u9-basicbank — stack not defined yet'"
+  }
+}

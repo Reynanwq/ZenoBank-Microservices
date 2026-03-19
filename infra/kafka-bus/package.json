@@ -1,0 +1,11 @@
+{
+  "name": "@zenobank/kafka-bus",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ZenōBank — infraestrutura compartilhada: kafka-bus",
+  "scripts": {
+    "build": "echo 'build: kafka-bus — a definir'",
+    "test": "echo 'test: kafka-bus — a definir'",
+    "lint": "echo 'lint: kafka-bus — a definir'"
+  }
+}

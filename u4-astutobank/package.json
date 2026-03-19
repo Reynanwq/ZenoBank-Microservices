@@ -1,0 +1,13 @@
+{
+  "name": "@zenobank/u4-astutobank",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ZenōBank — AstutoBank (Universo 4)",
+  "scripts": {
+    "build": "echo 'build: u4-astutobank — stack not defined yet'",
+    "test": "echo 'test: u4-astutobank — stack not defined yet'",
+    "lint": "echo 'lint: u4-astutobank — stack not defined yet'",
+    "start": "echo 'start: u4-astutobank — stack not defined yet'",
+    "start:dev": "echo 'start:dev: u4-astutobank — stack not defined yet'"
+  }
+}

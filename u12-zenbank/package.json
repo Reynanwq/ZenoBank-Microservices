@@ -1,0 +1,13 @@
+{
+  "name": "@zenobank/u12-zenbank",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ZenōBank — ZenBank (Universo 12)",
+  "scripts": {
+    "build": "echo 'build: u12-zenbank — stack not defined yet'",
+    "test": "echo 'test: u12-zenbank — stack not defined yet'",
+    "lint": "echo 'lint: u12-zenbank — stack not defined yet'",
+    "start": "echo 'start: u12-zenbank — stack not defined yet'",
+    "start:dev": "echo 'start:dev: u12-zenbank — stack not defined yet'"
+  }
+}
