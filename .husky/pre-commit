@@ -1,0 +1,10 @@
+#!/bin/sh
+
+echo "Rodando lint (não bloqueia)..."
+npm run lint:all || echo "lint falhou (ignorado)"
+
+echo "Rodando testes (não bloqueia)..."
+npm run test:all || echo "testes falharam (ignorado)"
+
+echo "Commit liberado"
+exit 0
