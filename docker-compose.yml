@@ -1,0 +1,133 @@
+version: '3.9'
+
+# =============================================================================
+# ZenōBank — Infraestrutura local de desenvolvimento
+# Sobe: Zookeeper + Kafka + Kafdrop
+# Bancos de dados NÃO estão aqui — cada universo define o seu quando especificado
+# =============================================================================
+
+services:
+
+  # ---------------------------------------------------------------------------
+  # Zookeeper — coordenação do cluster Kafka
+  # ---------------------------------------------------------------------------
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    container_name: zenobank-zookeeper
+    restart: unless-stopped
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - '2181:2181'
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
+      - zookeeper-log:/var/lib/zookeeper/log
+    networks:
+      - zenobank-net
+    healthcheck:
+      test: ['CMD', 'bash', '-c', 'echo ruok | nc localhost 2181']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # Kafka — barramento de eventos global do ZenōBank
+  # ---------------------------------------------------------------------------
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: zenobank-kafka
+    restart: unless-stopped
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    ports:
+      - '9092:9092'     # acesso externo (host / aplicações locais)
+      - '29092:29092'   # acesso interno (entre containers)
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+
+      # Listeners: PLAINTEXT para containers, PLAINTEXT_HOST para acesso do host
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+
+      # Replicação — single broker em dev, fator 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+
+      # Retenção padrão: 7 dias (604800000 ms)
+      KAFKA_LOG_RETENTION_MS: 604800000
+      KAFKA_LOG_RETENTION_BYTES: -1
+
+      # Auto-create desabilitado — tópicos são criados explicitamente pelo init
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'false'
+
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    networks:
+      - zenobank-net
+    healthcheck:
+      test: ['CMD', 'kafka-broker-api-versions', '--bootstrap-server', 'localhost:9092']
+      interval: 15s
+      timeout: 10s
+      retries: 10
+
+  # ---------------------------------------------------------------------------
+  # Kafka Init — cria todos os tópicos globais na primeira vez
+  # Roda uma vez e sai (restart: no)
+  # ---------------------------------------------------------------------------
+  kafka-init:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: zenobank-kafka-init
+    restart: 'no'
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      - zenobank-net
+    volumes:
+      - ./infra/kafka-bus/scripts/create-topics.sh:/create-topics.sh
+    command: ['bash', '/create-topics.sh']
+
+  # ---------------------------------------------------------------------------
+  # Kafdrop — UI para inspecionar tópicos, mensagens e consumer groups
+  # Acesso: http://localhost:9000
+  # ---------------------------------------------------------------------------
+  kafdrop:
+    image: obsidiandynamics/kafdrop:4.0.1
+    container_name: zenobank-kafdrop
+    restart: unless-stopped
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - '9000:9000'
+    environment:
+      KAFKA_BROKERCONNECT: kafka:29092
+      JVM_OPTS: '-Xms32M -Xmx128M'
+      SERVER_SERVLET_CONTEXTPATH: '/'
+    networks:
+      - zenobank-net
+
+# =============================================================================
+# Volumes — persistência local entre restarts
+# =============================================================================
+volumes:
+  zookeeper-data:
+    name: zenobank-zookeeper-data
+  zookeeper-log:
+    name: zenobank-zookeeper-log
+  kafka-data:
+    name: zenobank-kafka-data
+
+# =============================================================================
+# Network — todos os containers do ZenōBank se comunicam aqui
+# =============================================================================
+networks:
+  zenobank-net:
+    name: zenobank-net
+    driver: bridge
