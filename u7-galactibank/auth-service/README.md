@@ -1,42 +1,4 @@
-# @zenobank/u7-galactibank — GalactiBank
-
-> Banco financeiro do Universo 7 — o universo do Goku.
-> Primeiro banco completamente especificado — referência de processo para os demais.
-
-## Stack
-
-| Camada | Tecnologia |
-|--------|-----------|
-| Runtime | Node.js 20 |
-| Framework | NestJS |
-| Banco principal | PostgreSQL |
-| Banco de produtos | MongoDB |
-| Cache / Hold | Redis |
-| Mensageria | Kafka |
-
-## Sub-módulos
-
-```
-u7-galactibank/
-├── apps/
-│   └── api-gateway/
-└── modules/
-    ├── being/
-    ├── planet/
-    ├── account/
-    ├── transaction/
-    ├── clearing/        ← módulo mais crítico
-    ├── credit/
-    ├── card/
-    ├── ledger/
-    ├── notification/
-    ├── wealth/
-    └── auth/
-```
-
-Especificação completa: README raiz — seção 8.
-
-# u7-galactibank
+# auth-service
 
 This project uses Quarkus, the Supersonic Subatomic Java Framework.
 
@@ -87,7 +49,7 @@ Or, if you don't have GraalVM installed, you can run the native executable build
 ./mvnw package -Dnative -Dquarkus.native.container-build=true
 ```
 
-You can then execute your native executable with: `./target/u7-galactibank-1.0.0-SNAPSHOT-runner`
+You can then execute your native executable with: `./target/auth-service-1.0.0-runner`
 
 If you want to learn more about building native executables, please consult <https://quarkus.io/guides/maven-tooling>.
 
@@ -95,18 +57,26 @@ If you want to learn more about building native executables, please consult <htt
 
 - REST ([guide](https://quarkus.io/guides/rest)): A Jakarta REST implementation utilizing build time processing and Vert.x. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it.
 - Messaging - Kafka Connector ([guide](https://quarkus.io/guides/kafka-getting-started)): Connect to Kafka with Reactive Messaging
-- Apache Kafka Client ([guide](https://quarkus.io/guides/kafka)): Connect to Apache Kafka with its native API
+- YAML Configuration ([guide](https://quarkus.io/guides/config-yaml)): Use YAML to configure your Quarkus application
+- SmallRye JWT ([guide](https://quarkus.io/guides/security-jwt)): Secure your applications with JSON Web Token
 - SmallRye Health ([guide](https://quarkus.io/guides/smallrye-health)): Monitor service health
 - Kubernetes ([guide](https://quarkus.io/guides/kubernetes)): Generate Kubernetes resources from annotations
+- JDBC Driver - PostgreSQL ([guide](https://quarkus.io/guides/datasource)): Connect to the PostgreSQL database via JDBC
 - Micrometer metrics ([guide](https://quarkus.io/guides/micrometer)): Instrument the runtime and your application with dimensional metrics using Micrometer.
-- MongoDB client ([guide](https://quarkus.io/guides/mongodb)): Connect to MongoDB in either imperative or reactive style
 - Micrometer Registry Prometheus ([guide](https://quarkus.io/guides/micrometer)): Enable Prometheus support for Micrometer
 - SmallRye OpenAPI ([guide](https://quarkus.io/guides/openapi-swaggerui)): Document your REST APIs with OpenAPI - comes with Swagger UI
 - REST Jackson ([guide](https://quarkus.io/guides/rest#json-serialisation)): Jackson serialization support for Quarkus REST. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it
-- Redis Cache ([guide](https://quarkus.io/guides/cache-redis-reference)): Use Redis as the caching backend
-- Redis Client ([guide](https://quarkus.io/guides/redis)): Connect to Redis in either imperative or reactive style
+- Agroal - DB connection pool ([guide](https://quarkus.io/guides/datasource)): JDBC Datasources and connection pooling
 
 ## Provided Code
+
+### YAML Config
+
+Configure your application with YAML
+
+[Related guide section...](https://quarkus.io/guides/config-reference#configuration-examples)
+
+The Quarkus application configuration is located in `src/main/resources/application.yml`.
 
 ### Messaging codestart
 
