@@ -1,96 +1,66 @@
-# being-service
+# being-service — Cadastro de Seres Vivos
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+## Responsabilidade
 
-If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
+Serviço responsável pelo cadastro e gestão de todos os seres vivos do Universo 7.
 
-## Running the application in dev mode
+## Domínio
 
-You can run your application in dev mode that enables live coding using:
+- Emissão de **UID** (Universal ID) — identificador único e imutável de cada ser
+- Cadastro de seres vivos com nome, espécie, planeta de origem
+- Gestão de procuradores (account proxies)
+- Consulta pública de dados básicos de seres
 
-```shell script
-./mvnw quarkus:dev
-```
+## Contexto
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
+Todo ser vivo no Universo 7 precisa estar registrado no sistema antes de:
+- Abrir conta em qualquer planeta
+- Realizar transações financeiras
+- Solicitar crédito ou cartão
 
-## Packaging and running the application
+## Regras de negócio
 
-The application can be packaged using:
+- UID é gerado automaticamente no cadastro e nunca muda
+- Espécie é apenas atributo descritivo — não impacta lógica financeira
+- Um ser pode estar registrado sem ter conta (conta é opcional)
+- Nome pode ser alterado, UID não
 
-```shell script
-./mvnw package
-```
+## Banco de dados
 
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
+**MongoDB**
 
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
+Coleções:
+- `beings` — dados dos seres vivos
+- `proxies` — procuradores autorizados
 
-If you want to build an _über-jar_, execute the following command:
+## Endpoints principais
 
-```shell script
-./mvnw package -Dquarkus.package.jar.type=uber-jar
-```
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| POST | `/api/beings` | Cadastrar novo ser |
+| GET | `/api/beings/{uid}` | Buscar ser por UID |
+| PUT | `/api/beings/{uid}` | Atualizar dados |
+| POST | `/api/beings/{uid}/proxies` | Adicionar procurador |
+| GET | `/api/beings/{uid}/proxies` | Listar procuradores |
 
-The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
+## Eventos publicados
 
-## Creating a native executable
+| Tópico | Quando |
+|--------|--------|
+| `u7.being.registered` | Ser cadastrado com sucesso |
+| `u7.being.updated` | Dados atualizados |
+| `u7.proxy.added` | Procurador adicionado |
+| `u7.proxy.revoked` | Procurador revogado |
 
-You can create a native executable using:
+## Dependências
 
-```shell script
-./mvnw package -Dnative
-```
+- MongoDB
+- Kafka (para eventos)
+- Quarkus REST
 
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
+## Stack
 
-```shell script
-./mvnw package -Dnative -Dquarkus.native.container-build=true
-```
-
-You can then execute your native executable with: `./target/being-service-1.0.0-runner`
-
-If you want to learn more about building native executables, please consult <https://quarkus.io/guides/maven-tooling>.
-
-## Related Guides
-
-- MongoDB client ([guide](https://quarkus.io/guides/mongodb)): Connect to MongoDB in either imperative or reactive style
-- REST ([guide](https://quarkus.io/guides/rest)): A Jakarta REST implementation utilizing build time processing and Vert.x. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it.
-- Micrometer Registry Prometheus ([guide](https://quarkus.io/guides/micrometer)): Enable Prometheus support for Micrometer
-- SmallRye OpenAPI ([guide](https://quarkus.io/guides/openapi-swaggerui)): Document your REST APIs with OpenAPI - comes with Swagger UI
-- REST Jackson ([guide](https://quarkus.io/guides/rest#json-serialisation)): Jackson serialization support for Quarkus REST. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it
-- Messaging - Kafka Connector ([guide](https://quarkus.io/guides/kafka-getting-started)): Connect to Kafka with Reactive Messaging
-- YAML Configuration ([guide](https://quarkus.io/guides/config-yaml)): Use YAML to configure your Quarkus application
-- SmallRye Health ([guide](https://quarkus.io/guides/smallrye-health)): Monitor service health
-- Kubernetes ([guide](https://quarkus.io/guides/kubernetes)): Generate Kubernetes resources from annotations
-- Micrometer metrics ([guide](https://quarkus.io/guides/micrometer)): Instrument the runtime and your application with dimensional metrics using Micrometer.
-
-## Provided Code
-
-### YAML Config
-
-Configure your application with YAML
-
-[Related guide section...](https://quarkus.io/guides/config-reference#configuration-examples)
-
-The Quarkus application configuration is located in `src/main/resources/application.yml`.
-
-### Messaging codestart
-
-Use Quarkus Messaging
-
-[Related Apache Kafka guide section...](https://quarkus.io/guides/kafka-reactive-getting-started)
-
-
-### REST
-
-Easily start your REST Web Services
-
-[Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)
-
-### SmallRye Health
-
-Monitor your application's health using SmallRye Health
-
-[Related guide section...](https://quarkus.io/guides/smallrye-health)
+- Java 21
+- Quarkus 3.32.4
+- MongoDB Panache
+- Kafka Messaging

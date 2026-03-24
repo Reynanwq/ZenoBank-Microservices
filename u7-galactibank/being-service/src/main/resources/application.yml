@@ -1,13 +1,14 @@
-greeting:
-  message: "hello"
-mp:
-  messaging:
-    outgoing:
-      words-out:
-        topic: "words"
-    incoming:
-      words-in:
-        auto:
-          offset:
-            reset: "earliest"
-        topic: "words"
+quarkus:
+  mongodb:
+    connection-string: mongodb://localhost:27017/?retryWrites=false&uuidRepresentation=standard
+    database: galactibank
+  http:
+    port: 8081
+    cors:
+      enabled: true
+      origins: "*"
+  log:
+    level: INFO
+  swagger-ui:
+    always-include: true
+    path: /swagger-ui
