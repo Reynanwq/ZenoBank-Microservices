@@ -12,4 +12,6 @@ public class MyLivenessCheck implements HealthCheck {
         return HealthCheckResponse.up("alive");
     }
 
+   //Serve para monitoramento da aplicação.
+    //Retorna se a aplicação está viva (rodando).
 }

@@ -1,96 +1,288 @@
-# planet-service
+# Planet Service
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+Microserviço para gerenciamento de planetas e configurações fiscais no sistema Galactibank.
 
-If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
+---
 
-## Running the application in dev mode
+## Tecnologias
 
-You can run your application in dev mode that enables live coding using:
+* Java 21
+* Kotlin 1.9.24
+* Quarkus 3.15.1
+* MongoDB
+* Panache
+* Kafka (opcional)
 
-```shell script
-./mvnw quarkus:dev
+---
+
+## Pré-requisitos
+
+* Docker Desktop
+* JDK 21+
+* Maven 3.9+
+
+---
+
+## Subindo as dependências
+
+```bash
+# MongoDB
+docker run -d -p 27017:27017 --name mongodb-galactibank mongo:latest
+
+# Kafka (opcional)
+docker run -d --name kafka-galactibank -p 9092:9092 apache/kafka:latest
 ```
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
+---
 
-## Packaging and running the application
+## Configuração
 
-The application can be packaged using:
+Arquivo `src/main/resources/application.yml`:
 
-```shell script
-./mvnw package
+```yaml
+quarkus:
+  mongodb:
+    connection-string: mongodb://localhost:27017/?retryWrites=false&uuidRepresentation=standard
+    database: galactibank
+  http:
+    port: 8082
+  kafka:
+    devservices:
+      enabled: false
 ```
 
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
+---
 
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
+## Executando
 
-If you want to build an _über-jar_, execute the following command:
+```bash
+# Modo desenvolvimento
+mvn clean compile quarkus:dev
 
-```shell script
-./mvnw package -Dquarkus.package.jar.type=uber-jar
+# Build
+mvn clean package
+
+# Executar JAR
+java -jar target/quarkus-app/quarkus-run.jar
 ```
 
-The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
+---
 
-## Creating a native executable
+## Endpoints
 
-You can create a native executable using:
+### Planetas
 
-```shell script
-./mvnw package -Dnative
+| Método | Endpoint                        | Descrição              |
+| ------ | ------------------------------- | ---------------------- |
+| POST   | /api/planets                    | Criar planeta          |
+| GET    | /api/planets/{planetId}         | Buscar planeta         |
+| PUT    | /api/planets/{planetId}         | Atualizar planeta      |
+| DELETE | /api/planets/{planetId}         | Soft delete (INACTIVE) |
+| POST   | /api/planets/{planetId}/destroy | Destruir (DESTROYED)   |
+
+### Configurações Fiscais
+
+| Método | Endpoint                                   | Descrição          |
+| ------ | ------------------------------------------ | ------------------ |
+| POST   | /api/planets/tax-config                    | Criar configuração |
+| GET    | /api/planets/{planetId}/tax-rate/{taxType} | Buscar taxa atual  |
+
+---
+
+## Exemplos
+
+### Criar planeta
+
+```bash
+curl -X POST http://localhost:8082/api/planets \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Tatooine",
+    "galaxy": "Andromeda",
+    "population": 200000
+  }'
 ```
 
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
+**Response:**
 
-```shell script
-./mvnw package -Dnative -Dquarkus.native.container-build=true
+```json
+{
+  "planet_id": "550e8400-e29b-41d4-a716-446655440000",
+  "name": "Tatooine",
+  "galaxy": "Andromeda",
+  "population": 200000,
+  "status": "ACTIVE",
+  "created_at": "2026-03-25T10:00:00"
+}
 ```
 
-You can then execute your native executable with: `./target/planet-service-1.0.0-runner`
+---
 
-If you want to learn more about building native executables, please consult <https://quarkus.io/guides/maven-tooling>.
+### Buscar planeta
 
-## Related Guides
+```bash
+curl http://localhost:8082/api/planets/550e8400-e29b-41d4-a716-446655440000
+```
 
-- MongoDB client ([guide](https://quarkus.io/guides/mongodb)): Connect to MongoDB in either imperative or reactive style
-- REST ([guide](https://quarkus.io/guides/rest)): A Jakarta REST implementation utilizing build time processing and Vert.x. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it.
-- Micrometer Registry Prometheus ([guide](https://quarkus.io/guides/micrometer)): Enable Prometheus support for Micrometer
-- SmallRye OpenAPI ([guide](https://quarkus.io/guides/openapi-swaggerui)): Document your REST APIs with OpenAPI - comes with Swagger UI
-- REST Jackson ([guide](https://quarkus.io/guides/rest#json-serialisation)): Jackson serialization support for Quarkus REST. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it
-- Messaging - Kafka Connector ([guide](https://quarkus.io/guides/kafka-getting-started)): Connect to Kafka with Reactive Messaging
-- YAML Configuration ([guide](https://quarkus.io/guides/config-yaml)): Use YAML to configure your Quarkus application
-- SmallRye Health ([guide](https://quarkus.io/guides/smallrye-health)): Monitor service health
-- Kubernetes ([guide](https://quarkus.io/guides/kubernetes)): Generate Kubernetes resources from annotations
-- Micrometer metrics ([guide](https://quarkus.io/guides/micrometer)): Instrument the runtime and your application with dimensional metrics using Micrometer.
+---
 
-## Provided Code
+### Criar configuração de imposto
 
-### YAML Config
+```bash
+curl -X POST http://localhost:8082/api/planets/tax-config \
+  -H "Content-Type: application/json" \
+  -d '{
+    "planet_id": "550e8400-e29b-41d4-a716-446655440000",
+    "tax_rate": 0.05,
+    "tax_type": "OUTBOUND"
+  }'
+```
 
-Configure your application with YAML
+**Response:**
 
-[Related guide section...](https://quarkus.io/guides/config-reference#configuration-examples)
+```json
+{
+  "config_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "planet_id": "550e8400-e29b-41d4-a716-446655440000",
+  "tax_rate": 0.05,
+  "tax_type": "OUTBOUND",
+  "valid_from": "2026-03-25T10:00:00",
+  "valid_until": null
+}
+```
 
-The Quarkus application configuration is located in `src/main/resources/application.yml`.
+---
 
-### Messaging codestart
+### Buscar taxa atual
 
-Use Quarkus Messaging
+```bash
+curl http://localhost:8082/api/planets/550e8400-e29b-41d4-a716-446655440000/tax-rate/OUTBOUND
+```
 
-[Related Apache Kafka guide section...](https://quarkus.io/guides/kafka-reactive-getting-started)
+**Response:**
 
+```json
+{
+  "planet_id": "550e8400-e29b-41d4-a716-446655440000",
+  "tax_type": "OUTBOUND",
+  "tax_rate": 0.05
+}
+```
 
-### REST
+---
 
-Easily start your REST Web Services
+### Atualizar planeta
 
-[Related guide section...](https://quarkus.io/guides/getting-started-reactive#reactive-jax-rs-resources)
+```bash
+curl -X PUT http://localhost:8082/api/planets/550e8400-e29b-41d4-a716-446655440000 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Tatooine Updated",
+    "galaxy": "Andromeda",
+    "population": 250000
+  }'
+```
 
-### SmallRye Health
+---
 
-Monitor your application's health using SmallRye Health
+### Soft delete
 
-[Related guide section...](https://quarkus.io/guides/smallrye-health)
+```bash
+curl -X DELETE http://localhost:8082/api/planets/550e8400-e29b-41d4-a716-446655440000
+```
+
+---
+
+### Destruir planeta
+
+```bash
+curl -X POST http://localhost:8082/api/planets/550e8400-e29b-41d4-a716-446655440000/destroy
+```
+
+---
+
+## Estrutura do Banco
+
+### Collection: planets
+
+| Campo      | Tipo     | Descrição                   |
+| ---------- | -------- | --------------------------- |
+| planetId   | UUID     | Identificador único         |
+| name       | String   | Nome do planeta             |
+| galaxy     | String   | Galáxia                     |
+| population | Long     | População                   |
+| status     | Enum     | ACTIVE, INACTIVE, DESTROYED |
+| createdAt  | DateTime | Data de criação             |
+
+---
+
+### Collection: planet_tax_configs
+
+| Campo      | Tipo       | Descrição                        |
+| ---------- | ---------- | -------------------------------- |
+| configId   | UUID       | Identificador da configuração    |
+| planetId   | UUID       | Referência ao planeta            |
+| taxRate    | BigDecimal | Percentual do imposto            |
+| taxType    | Enum       | OUTBOUND, INBOUND                |
+| validFrom  | DateTime   | Início da vigência               |
+| validUntil | DateTime   | Fim da vigência (null = vigente) |
+
+---
+
+## Queries MongoDB
+
+```javascript
+// Listar planetas ativos
+db.planets.find({ status: "ACTIVE" })
+
+// Buscar taxa atual
+db.planet_tax_configs.find({
+    planetId: UUID("550e8400-e29b-41d4-a716-446655440000"),
+    taxType: "OUTBOUND",
+    validFrom: { $lte: new Date() },
+    validUntil: null
+})
+
+// Histórico de taxas
+db.planet_tax_configs.find({
+    planetId: UUID("550e8400-e29b-41d4-a716-446655440000")
+}).sort({ validFrom: -1 })
+
+// Estatísticas por status
+db.planets.aggregate([
+    { $group: { _id: "$status", count: { $sum: 1 } } }
+])
+```
+
+---
+
+## Swagger UI
+
+```
+http://localhost:8082/swagger-ui
+```
+
+---
+
+## Estrutura do Projeto
+
+```
+src/main/kotlin/com/zenobank/u7/planet/
+├── dto/
+│   ├── PlanetRequest.kt
+│   ├── PlanetResponse.kt
+│   ├── TaxConfigRequest.kt
+│   └── TaxConfigResponse.kt
+├── entity/
+│   ├── Planet.kt
+│   ├── PlanetTaxConfig.kt
+│   ├── PlanetStatus.kt
+│   └── TaxType.kt
+├── repository/
+│   ├── PlanetRepository.kt
+│   └── PlanetTaxConfigRepository.kt
+├── resource/
+│   └── PlanetResource.kt
+└── service/
+    └── PlanetService.kt
+```

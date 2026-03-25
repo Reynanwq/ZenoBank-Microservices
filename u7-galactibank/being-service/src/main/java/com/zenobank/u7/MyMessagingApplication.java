@@ -10,6 +10,7 @@ import org.eclipse.microprofile.reactive.messaging.Outgoing;
 
 import java.util.stream.Stream;
 
+//Essa parte usa Reactive Messaging (geralmente com Kafka por baixo).
 @ApplicationScoped
 public class MyMessagingApplication {
 
