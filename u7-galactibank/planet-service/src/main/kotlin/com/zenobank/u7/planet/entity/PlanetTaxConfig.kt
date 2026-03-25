@@ -1,5 +1,6 @@
 package com.zenobank.u7.planet.entity
 
+import com.zenobank.u7.planet.entity.enum.TaxType
 import io.quarkus.mongodb.panache.PanacheMongoEntity
 import io.quarkus.mongodb.panache.common.MongoEntity
 import java.math.BigDecimal
@@ -10,7 +11,7 @@ import java.util.UUID
 class PlanetTaxConfig(
     var planetId: UUID,
     var taxRate: BigDecimal,
-    var taxType: String,
+    var taxType: TaxType,
     var configId: UUID = UUID.randomUUID(),
     var validFrom: LocalDateTime = LocalDateTime.now(),
     var validUntil: LocalDateTime? = null

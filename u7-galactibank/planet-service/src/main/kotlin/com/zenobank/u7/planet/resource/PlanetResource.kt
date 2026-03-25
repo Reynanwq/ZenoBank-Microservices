@@ -21,7 +21,6 @@ class PlanetResource {
     @Inject
     lateinit var service: PlanetService
 
-
     @POST
     fun createPlanet(@Valid request: PlanetRequest): Response {
         val response = service.createPlanet(request)

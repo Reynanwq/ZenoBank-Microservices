@@ -2,7 +2,9 @@ package com.zenobank.u7.planet.service
 
 import com.zenobank.u7.planet.dto.*
 import com.zenobank.u7.planet.entity.Planet
+import com.zenobank.u7.planet.entity.enum.PlanetStatus
 import com.zenobank.u7.planet.entity.PlanetTaxConfig
+import com.zenobank.u7.planet.entity.enum.TaxType
 import com.zenobank.u7.planet.repository.PlanetRepository
 import com.zenobank.u7.planet.repository.PlanetTaxConfigRepository
 import jakarta.enterprise.context.ApplicationScoped
@@ -35,7 +37,7 @@ class PlanetService {
             name = planet.name,
             galaxy = planet.galaxy,
             population = planet.population,
-            status = planet.status,
+            status = planet.status.name,
             createdAt = planet.createdAt
         )
     }
@@ -49,7 +51,7 @@ class PlanetService {
             name = planet.name,
             galaxy = planet.galaxy,
             population = planet.population,
-            status = planet.status,
+            status = planet.status.name,
             createdAt = planet.createdAt
         )
     }
@@ -68,7 +70,7 @@ class PlanetService {
             name = planet.name,
             galaxy = planet.galaxy,
             population = planet.population,
-            status = planet.status,
+            status = planet.status.name,
             createdAt = planet.createdAt
         )
     }
@@ -77,8 +79,7 @@ class PlanetService {
         val planet = planetRepository.findByPlanetId(planetId)
             ?: throw NotFoundException("Planet not found with ID: $planetId")
 
-        // Soft delete - marca como INACTIVE
-        planet.status = "INACTIVE"
+        planet.status = PlanetStatus.INACTIVE
         planetRepository.update(planet)
     }
 
@@ -86,25 +87,28 @@ class PlanetService {
         val planet = planetRepository.findByPlanetId(planetId)
             ?: throw NotFoundException("Planet not found with ID: $planetId")
 
-        // Destrói o planeta - status DESTROYED
-        planet.status = "DESTROYED"
+        planet.status = PlanetStatus.DESTROYED
         planetRepository.update(planet)
     }
 
     // Tax Config
     fun setTaxConfig(request: TaxConfigRequest): TaxConfigResponse {
-        // Desativa configs anteriores
-        val activeConfigs = taxConfigRepository.findActiveConfigs(request.planetId, request.taxType)
+        val taxType = try {
+            TaxType.valueOf(request.taxType.uppercase())
+        } catch (e: IllegalArgumentException) {
+            throw IllegalArgumentException("Invalid tax type: ${request.taxType}. Must be OUTBOUND or INBOUND")
+        }
+
+        val activeConfigs = taxConfigRepository.findActiveConfigs(request.planetId, taxType)
         activeConfigs.forEach { it.validUntil = LocalDateTime.now() }
         if (activeConfigs.isNotEmpty()) {
             taxConfigRepository.persist(activeConfigs)
         }
 
-        // Cria nova config
         val config = PlanetTaxConfig(
             planetId = request.planetId,
             taxRate = request.taxRate,
-            taxType = request.taxType
+            taxType = taxType
         )
         taxConfigRepository.persist(config)
 
@@ -112,16 +116,20 @@ class PlanetService {
             configId = config.configId,
             planetId = config.planetId,
             taxRate = config.taxRate,
-            taxType = config.taxType,
+            taxType = config.taxType.name,
             validFrom = config.validFrom,
             validUntil = config.validUntil
         )
     }
 
     fun getCurrentTaxRate(planetId: UUID, taxType: String): BigDecimal {
-        return taxConfigRepository.findCurrentTaxRate(planetId, taxType)
+        val taxTypeEnum = try {
+            TaxType.valueOf(taxType.uppercase())
+        } catch (e: IllegalArgumentException) {
+            throw IllegalArgumentException("Invalid tax type: $taxType. Must be OUTBOUND or INBOUND")
+        }
+
+        return taxConfigRepository.findCurrentTaxRate(planetId, taxTypeEnum)
             ?: throw NotFoundException("No active tax config found for planet $planetId and type $taxType")
     }
-
-
 }
